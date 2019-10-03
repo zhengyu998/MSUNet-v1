@@ -51,7 +51,7 @@ In terms of implementation, we use pytorch to implement our model. Our repositor
           def backward(ctx, g):
               return g
     ```
-    * As there is a scale factor $`\sqrt{M}`$ for the weights and we are implementing fake quantization, we assume that the multiplicatin of scale factor $`\sqrt{M}`$ is performed **after** convolving the input with **ternary weights**. 
+    * As there is a scale factor $$\sqrt{M}$$ for the weights and we are implementing fake quantization, we assume that the multiplicatin of scale factor $`\sqrt{M}`$ is performed **after** convolving the input with **ternary weights**. 
     * Also note that as the ternary weights tends to be sparse in our implementation, we assume that they are compatible with sparse matrix storage and sparse math operation.
     * Therefore, the overall flops is calculated from three parts: 1) sparse 1-bit (-1, 1) multiplication in the convolution operation; 2) sparse 32-bit addition in the convolution operation; and 3) 32-bit multiplication for multiplying the scale factor on the output of the layer.
     * And the number of parameters is calculated from three parts: 1) 1-bit (-1,1) representation of the non-zero values in weights; 2) bitmask of the full weights; 3) 1 full precision scale factor for each convolutional layer.

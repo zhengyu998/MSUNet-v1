@@ -17,7 +17,7 @@ We follow the training-and-pruning pipeline, where we first train a network with
 
 **The test accuracy in the pruning stage:**
 ![Pruning result](images/pruning.png "Pruning result")
-Not that the model reached the target sparsity after 100 epochs.
+Note that the model reached the target sparsity after 100 epochs.
 
 ### Design details
 

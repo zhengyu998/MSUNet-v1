@@ -13,10 +13,10 @@ It exploits the power of mixed depthwise convolution, quantization and sparsific
 We follow the training-and-pruning pipeline, where we first train a network with ternary weights and then prune the network to further sparsify the squeeze-excitation layers.
  
 **The test accuracy in the training stage:**
-![alt text](images/training.png "Training result")
+![Training result](images/training.png "Training result")
 
 **The test accuracy in the pruning stage:**
-![alt text](images/pruning.png "Pruning result")
+![Pruning result](images/pruning.png "Pruning result")
 Not that the model reached the target sparsity after 100 epochs.
 
 ### Design details
@@ -31,7 +31,7 @@ In terms of implementation, we use pytorch to implement our model. Our repositor
     * Some convolutional layers are ternarized, i.e., the weights are either -1, 0 or +1. 
     * Although our implementation allows binary weight, we find that ternary weights generally perform better then binary. Therefore, we stick to ternary weights for some convolution layers.
     * We follow an approach similar to [Training wide residual networks for deployment using a single bit for each weight](https://arxiv.org/abs/1802.08530) to represent the ternary weights, that is, 
-    $`W'=\sqrt{M} \times Ternary(W)`$ where $`W`$ is the full precision weight, $`Ternary(W)`$ quantizes the weight to (-1,0,+1) and $`\sqrt{M}`$ is a multiplier that scales all the weights in a particular convolutional layer. 
+    ![eqn1](images/eqn1.gif)( where *W* is the full precision weight, *Ternary(W)* quantizes the weight to (-1,0,+1) and ![sqrtM](images/eqn2.gif) is a multiplier that scales all the weights in a particular convolutional layer. 
     
     * The piece of code that reflects the ternary operation is as below 
     ```python
@@ -51,13 +51,13 @@ In terms of implementation, we use pytorch to implement our model. Our repositor
           def backward(ctx, g):
               return g
     ```
-    * As there is a scale factor $`\sqrt{M}`$ for the weights and we are implementing fake quantization, we assume that the multiplicatin of scale factor $`\sqrt{M}`$ is performed **after** convolving the input with **ternary weights**. 
+    * As there is a scale factor ![sqrtM](images/eqn2.gif) for the weights and we are implementing fake quantization, we assume that the multiplicatin of scale factor ![sqrtM](images/eqn2.gif) is performed **after** convolving the input with **ternary weights**. 
     * Also note that as the ternary weights tends to be sparse in our implementation, we assume that they are compatible with sparse matrix storage and sparse math operation.
     * Therefore, the overall flops is calculated from three parts: 1) sparse 1-bit (-1, 1) multiplication in the convolution operation; 2) sparse 32-bit addition in the convolution operation; and 3) 32-bit multiplication for multiplying the scale factor on the output of the layer.
     * And the number of parameters is calculated from three parts: 1) 1-bit (-1,1) representation of the non-zero values in weights; 2) bitmask of the full weights; 3) 1 full precision scale factor for each convolutional layer.
  
 * **Sparse Squeeze-excitation layers**
-    * The same as [pytorch-image-models](https://github.com/rwightman/pytorch-image-models), we use 1x1 convolution performed on features with spatial dimension $`H \times W = 1 \times 1`$ to perform squeeze-and-excitation, which is equivalent to the fully connected layer implementation.
+    * The same as [pytorch-image-models](https://github.com/rwightman/pytorch-image-models), we use 1x1 convolution performed on features with spatial dimension ![HxW](images/eqn3.gif) to perform squeeze-and-excitation, which is equivalent to the fully connected layer implementation.
     * In order to make the weights sparse, we perform pruning on the weights of squeeze-excitation layer.
     * Therefore, the number of additions and multiplication comes from the sparse 1x1 convolution.
     * And the number of parameters comes from two pars: 1) full precision non-zeros values of the weights; 2) bitmask of the full weights.

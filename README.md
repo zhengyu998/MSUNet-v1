@@ -1,4 +1,4 @@
-# MSUNet
+# MSUNet-v1
 MSUNet-v1 is a deep convolutional neural network that competes in the CIFAR-100 image classification task in the 2019 NeurIPS MicroNet Challenge. 
 
 It exploits the power of mixed depthwise convolution, quantization and sparsification to achieve lightweight yet effective network architecture.
